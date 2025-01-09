@@ -20,6 +20,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -29,7 +38,7 @@ const formSchema = z.object({
 });
 
 export function LoginButton() {
-  const { user, signInWithEmail, signUp, signOut } = useAuth();
+  const { user, profile, signInWithEmail, signUp, signOut } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -57,13 +66,30 @@ export function LoginButton() {
 
   if (user) {
     return (
-      <Button 
-        variant="outline" 
-        onClick={signOut}
-        className="animate-fade-in"
-      >
-        Sign Out
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar>
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback>
+                {user.email?.[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end">
+          <DropdownMenuLabel>
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{profile?.username || user.email}</p>
+              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={signOut}>
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
