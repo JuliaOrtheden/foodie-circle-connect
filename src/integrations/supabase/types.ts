@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      dishes: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          notes: string | null
+          rating: number | null
+          restaurant: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          notes?: string | null
+          rating?: number | null
+          restaurant?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          notes?: string | null
+          rating?: number | null
+          restaurant?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dishes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -32,6 +73,44 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      taste_preferences: {
+        Row: {
+          created_at: string
+          dietary_restrictions: string[] | null
+          favorite_cuisine: string[] | null
+          id: string
+          spice_preference: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          dietary_restrictions?: string[] | null
+          favorite_cuisine?: string[] | null
+          id?: string
+          spice_preference?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          dietary_restrictions?: string[] | null
+          favorite_cuisine?: string[] | null
+          id?: string
+          spice_preference?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taste_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

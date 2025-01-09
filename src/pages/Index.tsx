@@ -2,6 +2,8 @@ import { PopularDishes } from "@/components/PopularDishes";
 import { FriendsFeed } from "@/components/FriendsFeed";
 import { LoginButton } from "@/components/LoginButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { DishForm } from "@/components/DishForm";
+import { PreferencesForm } from "@/components/PreferencesForm";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -27,10 +29,22 @@ const Index = () => {
         
         <main>
           {user ? (
-            <>
-              <PopularDishes />
-              <FriendsFeed />
-            </>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <section className="bg-white p-6 rounded-lg shadow">
+                  <h2 className="text-2xl font-semibold mb-4">Log a Dish</h2>
+                  <DishForm />
+                </section>
+                <section className="bg-white p-6 rounded-lg shadow">
+                  <h2 className="text-2xl font-semibold mb-4">Your Taste Preferences</h2>
+                  <PreferencesForm />
+                </section>
+              </div>
+              <div className="space-y-8">
+                <PopularDishes />
+                <FriendsFeed />
+              </div>
+            </div>
           ) : (
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold mb-4">Sign in to start sharing your culinary adventures</h2>
