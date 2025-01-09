@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -31,6 +31,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleAuthError = (error: AuthError) => {
+    if (error.message.includes('over_email_send_rate_limit')) {
+      toast.error('Please wait a minute before trying to sign up again.');
+    } else {
+      toast.error(error.message);
+    }
+    throw error;
+  };
+
   const signInWithEmail = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -40,8 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       toast.success('Successfully signed in!');
     } catch (error: any) {
-      toast.error(error.message);
-      throw error;
+      handleAuthError(error);
     }
   };
 
@@ -54,8 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       toast.success('Check your email to confirm your account!');
     } catch (error: any) {
-      toast.error(error.message);
-      throw error;
+      handleAuthError(error);
     }
   };
 
@@ -65,8 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       toast.success('Successfully signed out!');
     } catch (error: any) {
-      toast.error(error.message);
-      throw error;
+      handleAuthError(error);
     }
   };
 
