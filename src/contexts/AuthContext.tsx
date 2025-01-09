@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, AuthError } from '@supabase/supabase-js';
+import { User, AuthError, AuthApiError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -32,11 +32,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleAuthError = (error: AuthError) => {
-    if (error.message.includes('over_email_send_rate_limit')) {
-      toast.error('Please wait a minute before trying to sign up again.');
-    } else {
-      toast.error(error.message);
+    if (error instanceof AuthApiError) {
+      switch (error.status) {
+        case 400:
+          if (error.message.includes('email_not_confirmed')) {
+            toast.error('Please check your email and confirm your account before signing in.');
+            return;
+          }
+          break;
+        case 429:
+          if (error.message.includes('over_email_send_rate_limit')) {
+            toast.error('Please wait a minute before trying to sign up again.');
+            return;
+          }
+          break;
+      }
     }
+    toast.error(error.message);
     throw error;
   };
 
