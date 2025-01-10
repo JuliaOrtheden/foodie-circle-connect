@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImageUpload } from "./ImageUpload";
 import { Label } from "@/components/ui/label";
+import { Heart, Briefcase, Users, Home, Beer } from "lucide-react";
 
 interface DishFormData {
   name: string;
@@ -15,12 +16,23 @@ interface DishFormData {
   notes?: string;
 }
 
+type AtmosphereCategory = "date" | "after work" | "business dinner" | "going out with friends" | "family gatherings";
+
+const atmosphereCategories: { value: AtmosphereCategory; label: string; icon: JSX.Element }[] = [
+  { value: "date", label: "Date Night 💑", icon: <Heart className="h-4 w-4" /> },
+  { value: "after work", label: "After Work 🍺", icon: <Beer className="h-4 w-4" /> },
+  { value: "business dinner", label: "Business Dinner 💼", icon: <Briefcase className="h-4 w-4" /> },
+  { value: "going out with friends", label: "With Friends 👥", icon: <Users className="h-4 w-4" /> },
+  { value: "family gatherings", label: "Family Time 🏠", icon: <Home className="h-4 w-4" /> },
+];
+
 export function DishForm() {
   const { user, profile, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [atmosphereRating, setAtmosphereRating] = useState<number>(0);
+  const [selectedAtmosphere, setSelectedAtmosphere] = useState<AtmosphereCategory | null>(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   useEffect(() => {
@@ -52,12 +64,14 @@ export function DishForm() {
     console.log('Form data:', data);
     console.log('Selected rating:', selectedRating);
     console.log('Atmosphere rating:', atmosphereRating);
+    console.log('Selected atmosphere:', selectedAtmosphere);
     console.log('Image URL:', imageUrl);
 
     const formDataWithRatings = {
       ...data,
       rating: selectedRating || null,
       atmosphere: atmosphereRating ? String(atmosphereRating) : null,
+      place: selectedAtmosphere,
       user_id: profile.id,
     };
     
@@ -87,6 +101,7 @@ export function DishForm() {
       setImageUrl(null);
       setSelectedRating(0);
       setAtmosphereRating(0);
+      setSelectedAtmosphere(null);
     } catch (error) {
       console.error('Error in onSubmit:', error);
       toast.error("Failed to log dish. Please try again.");
@@ -180,6 +195,24 @@ export function DishForm() {
           <span className="ml-2 text-sm text-gray-600">
             {atmosphereRating > 0 ? `${atmosphereRating} star${atmosphereRating > 1 ? 's' : ''}` : 'No rating'}
           </span>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Atmosphere Category (Optional)</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {atmosphereCategories.map((category) => (
+            <Button
+              key={category.value}
+              type="button"
+              variant={selectedAtmosphere === category.value ? "default" : "outline"}
+              className="flex items-center gap-2 w-full"
+              onClick={() => setSelectedAtmosphere(category.value)}
+            >
+              {category.icon}
+              <span>{category.label}</span>
+            </Button>
+          ))}
         </div>
       </div>
 
