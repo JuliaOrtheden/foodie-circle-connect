@@ -1,162 +1,24 @@
-import { useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { SearchInput } from "@/components/search/SearchInput";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { UsersList } from "@/components/search/UsersList";
 import { RestaurantsList } from "@/components/search/RestaurantsList";
 import { Button } from "@/components/ui/button";
-import { Clock, Search } from "lucide-react";
+import { Clock } from "lucide-react";
 import { LoginButton } from "@/components/LoginButton";
+import { useSearchState } from "@/hooks/useSearchState";
+import { useUserSearch } from "@/hooks/useUserSearch";
+import { useRestaurantSearch } from "@/hooks/useRestaurantSearch";
+import { useRestaurantSubscriptions } from "@/hooks/useRestaurantSubscriptions";
 
 const SearchPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const query = searchParams.get("q") || "";
-  const category = searchParams.get("category") || "people";
-  const city = searchParams.get("city") || "";
-  const cuisine = searchParams.get("cuisine") || "";
+  const { query, category, city, cuisine, updateSearch } = useSearchState();
   const { user } = useAuth();
-
-  const { data: subscriptions } = useQuery({
-    queryKey: ["subscriptions", user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id);
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  const { data: userResults } = useQuery({
-    queryKey: ["search", "people", query],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .ilike("username", query ? `%${query}%` : '%')
-        .limit(20);
-      
-      if (error) {
-        console.error("Error fetching profiles:", error);
-        return [];
-      }
-      
-      return data || [];
-    },
-    enabled: category === "people",
-  });
-
-  const { data: restaurantResults } = useQuery({
-    queryKey: ["search", "restaurants", query, city, cuisine],
-    queryFn: async () => {
-      // First, if cuisine is selected, get user_ids from taste_preferences
-      let userIdsWithCuisine: string[] = [];
-      if (cuisine) {
-        const { data: preferencesData } = await supabase
-          .from("taste_preferences")
-          .select("user_id")
-          .contains("favorite_cuisine", [cuisine]);
-        
-        userIdsWithCuisine = (preferencesData || []).map(p => p.user_id!);
-      }
-
-      // Then query dishes with all filters
-      let query = supabase
-        .from("dishes")
-        .select("restaurant, place")
-        .not("restaurant", "is", null);
-
-      if (city) {
-        query = query.eq("place", city);
-      }
-
-      if (cuisine && userIdsWithCuisine.length > 0) {
-        query = query.in("user_id", userIdsWithCuisine);
-      }
-
-      const { data } = await query.limit(20);
-      
-      const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
-      return uniqueRestaurants.map(restaurant => ({ restaurant: restaurant! }));
-    },
-    enabled: category === "restaurants",
-  });
-
-  const handleSubscribe = async (restaurantName: string) => {
-    if (!user) {
-      toast.error("Please sign in to subscribe to restaurants");
-      return;
-    }
-
-    try {
-      const existingSubscription = subscriptions?.find(
-        sub => sub.subscribed_to_restaurant === restaurantName
-      );
-
-      if (existingSubscription) {
-        const { error } = await supabase
-          .from("subscriptions")
-          .delete()
-          .eq("id", existingSubscription.id);
-
-        if (error) throw error;
-        toast.success(`Unsubscribed from ${restaurantName}`);
-      } else {
-        const { error } = await supabase
-          .from("subscriptions")
-          .insert({
-            user_id: user.id,
-            subscribed_to_restaurant: restaurantName,
-          });
-
-        if (error) throw error;
-        toast.success(`Subscribed to ${restaurantName}`);
-      }
-    } catch (error) {
-      console.error("Error managing subscription:", error);
-      toast.error("Failed to update subscription");
-    }
-  };
-
-  const isSubscribed = (restaurantName: string) => {
-    return subscriptions?.some(
-      sub => sub.subscribed_to_restaurant === restaurantName
-    );
-  };
-
-  const handleSearch = (value: string) => {
-    setSearchParams({
-      q: value,
-      category,
-      city,
-      cuisine,
-    });
-  };
-
-  const handleCityChange = (value: string) => {
-    setSearchParams({
-      q: query,
-      category,
-      city: value,
-      cuisine,
-    });
-  };
-
-  const handleCuisineChange = (value: string) => {
-    setSearchParams({
-      q: query,
-      category,
-      city,
-      cuisine: value,
-    });
-  };
+  const { data: userResults } = useUserSearch(query);
+  const { data: restaurantResults } = useRestaurantSearch(query, city, cuisine);
+  const { handleSubscribe, isSubscribed } = useRestaurantSubscriptions();
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,27 +46,23 @@ const SearchPage = () => {
 
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="space-y-4">
-            <SearchInput value={query} onChange={handleSearch} />
+            <SearchInput 
+              value={query} 
+              onChange={(value) => updateSearch({ q: value })} 
+            />
             {category === "restaurants" && (
               <SearchFilters
                 city={city}
                 cuisine={cuisine}
-                onCityChange={handleCityChange}
-                onCuisineChange={handleCuisineChange}
+                onCityChange={(value) => updateSearch({ city: value })}
+                onCuisineChange={(value) => updateSearch({ cuisine: value })}
               />
             )}
           </div>
 
           <Tabs
             value={category}
-            onValueChange={(value) =>
-              setSearchParams({
-                q: query,
-                category: value,
-                city,
-                cuisine,
-              })
-            }
+            onValueChange={(value) => updateSearch({ category: value })}
           >
             <TabsList className="w-full justify-start border-b rounded-none h-auto p-0">
               <TabsTrigger
