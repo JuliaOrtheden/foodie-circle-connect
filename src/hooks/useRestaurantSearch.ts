@@ -18,7 +18,7 @@ export const useRestaurantSearch = (query: string, city: string, cuisine: string
 
       let queryBuilder = supabase
         .from("dishes")
-        .select("restaurant, place")
+        .select("restaurant, atmosphere")
         .not("restaurant", "is", null);
 
       if (city) {
@@ -26,17 +26,37 @@ export const useRestaurantSearch = (query: string, city: string, cuisine: string
       }
 
       if (atmosphere) {
-        queryBuilder = queryBuilder.eq("place", atmosphere);
+        queryBuilder = queryBuilder.eq("atmosphere", atmosphere);
       }
 
       if (cuisine && userIdsWithCuisine.length > 0) {
         queryBuilder = queryBuilder.in("user_id", userIdsWithCuisine);
       }
 
-      const { data } = await queryBuilder.limit(20);
+      const { data } = await queryBuilder;
       
+      // Group by restaurant and calculate average atmosphere rating
+      const restaurantMap = new Map<string, { count: number, total: number }>();
+      data?.forEach(dish => {
+        if (!restaurantMap.has(dish.restaurant!)) {
+          restaurantMap.set(dish.restaurant!, { count: 0, total: 0 });
+        }
+        if (dish.atmosphere) {
+          const current = restaurantMap.get(dish.restaurant!)!;
+          current.count++;
+          current.total += parseFloat(dish.atmosphere);
+        }
+      });
+
       const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
-      return uniqueRestaurants.map(restaurant => ({ restaurant: restaurant! }));
+      return uniqueRestaurants
+        .filter(Boolean)
+        .map(restaurant => ({ 
+          restaurant: restaurant!,
+          atmosphereRating: restaurantMap.get(restaurant!)?.count 
+            ? (restaurantMap.get(restaurant!)!.total / restaurantMap.get(restaurant!)!.count).toFixed(1)
+            : undefined
+        }));
     },
     enabled: true,
   });

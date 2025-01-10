@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 
 export interface Restaurant {
   restaurant: string;
+  atmosphereRating?: string;
 }
 
 interface RestaurantsListProps {
@@ -30,6 +31,14 @@ export const RestaurantsList = ({
             >
               {result.restaurant}
             </Link>
+            {result.atmosphereRating && (
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm text-gray-600">
+                  Atmosphere: {result.atmosphereRating}/5
+                </span>
+              </div>
+            )}
           </div>
           <button
             onClick={() => onSubscribe(result.restaurant)}
