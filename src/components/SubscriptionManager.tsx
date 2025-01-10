@@ -9,10 +9,11 @@ import { UserPlus, Store } from "lucide-react";
 
 type Subscription = {
   id: string;
-  subscribed_to_user_id: {
+  subscribed_to_user_id: string | null;
+  subscribed_to_restaurant: string | null;
+  profiles: {
     username: string;
   } | null;
-  subscribed_to_restaurant: string | null;
 };
 
 export const SubscriptionManager = () => {
@@ -28,10 +29,11 @@ export const SubscriptionManager = () => {
         .from("subscriptions")
         .select(`
           id,
-          subscribed_to_user_id (
+          subscribed_to_user_id,
+          subscribed_to_restaurant,
+          profiles:subscribed_to_user_id (
             username
-          ),
-          subscribed_to_restaurant
+          )
         `)
         .eq("user_id", user?.id);
 
@@ -156,8 +158,8 @@ export const SubscriptionManager = () => {
               className="flex justify-between items-center p-3 bg-secondary rounded-lg"
             >
               <span>
-                {sub.subscribed_to_user_id
-                  ? `User: ${sub.subscribed_to_user_id.username}`
+                {sub.profiles
+                  ? `User: ${sub.profiles.username}`
                   : `Restaurant: ${sub.subscribed_to_restaurant}`}
               </span>
               <Button
