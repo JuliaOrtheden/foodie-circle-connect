@@ -16,20 +16,20 @@ interface DishFormData {
 }
 
 export function DishForm() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   const onSubmit = async (data: DishFormData) => {
-    if (!user) {
-      console.log('No user found, showing error toast');
+    if (!user || !profile) {
+      console.log('No user or profile found, showing error toast');
       toast.error("Please sign in to log a dish");
       return;
     }
 
-    console.log('Starting submission with user:', user.id);
+    console.log('Starting submission with profile:', profile.id);
     console.log('Form data:', data);
     console.log('Selected rating:', selectedRating);
     console.log('Image URL:', imageUrl);
@@ -37,7 +37,7 @@ export function DishForm() {
     const formDataWithRating = {
       ...data,
       rating: selectedRating || null,
-      user_id: user.id,
+      user_id: profile.id, // Use profile.id instead of user.id
     };
     
     console.log('Prepared form data:', formDataWithRating);
