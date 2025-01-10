@@ -20,10 +20,16 @@ export function DishForm() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [selectedRating, setSelectedRating] = useState<number>(0);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   const onSubmit = async (data: DishFormData) => {
-    console.log('Form submitted with data:', { ...data, imageUrl });
+    const formDataWithRating = {
+      ...data,
+      rating: selectedRating
+    };
+    
+    console.log('Form submitted with data:', { ...formDataWithRating, imageUrl });
     
     if (!user) {
       console.log('No user found, showing error toast');
@@ -37,7 +43,7 @@ export function DishForm() {
       const { error, data: insertedData } = await supabase
         .from('dishes')
         .insert({
-          ...data,
+          ...formDataWithRating,
           user_id: user.id,
           image_url: imageUrl,
         })
@@ -53,12 +59,33 @@ export function DishForm() {
       toast.success("Dish logged successfully!");
       reset();
       setImageUrl(null);
+      setSelectedRating(0);
     } catch (error) {
       console.error('Error in onSubmit:', error);
       toast.error("Failed to log dish. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderForks = () => {
+    const forks = [];
+    for (let i = 1; i <= 5; i++) {
+      forks.push(
+        <button
+          key={i}
+          type="button"
+          onClick={() => setSelectedRating(i)}
+          className={`text-2xl transition-all ${
+            i <= selectedRating ? 'opacity-100 scale-110' : 'opacity-50 scale-100'
+          } hover:scale-110 focus:outline-none`}
+          aria-label={`Rate ${i} forks`}
+        >
+          🍴
+        </button>
+      );
+    }
+    return forks;
   };
 
   return (
@@ -90,21 +117,13 @@ export function DishForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="rating">Rating (1-5)</Label>
-        <Input
-          id="rating"
-          {...register("rating", { 
-            min: { value: 1, message: "Rating must be at least 1" },
-            max: { value: 5, message: "Rating must not exceed 5" },
-            valueAsNumber: true 
-          })}
-          type="number"
-          placeholder="How would you rate this dish?"
-          className="w-full"
-        />
-        {errors.rating && (
-          <p className="text-sm text-red-500">{errors.rating.message}</p>
-        )}
+        <Label>Rating</Label>
+        <div className="flex gap-2 items-center">
+          {renderForks()}
+          <span className="ml-2 text-sm text-gray-600">
+            {selectedRating > 0 ? `${selectedRating} fork${selectedRating > 1 ? 's' : ''}` : 'No rating'}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-2">
