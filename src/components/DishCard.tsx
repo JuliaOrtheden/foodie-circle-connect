@@ -84,31 +84,27 @@ export function DishCard({
             <Heart className="h-4 w-4 fill-primary text-primary" />
           )}
         </div>
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-primary text-primary" />
             <span className="text-sm font-medium">{rating}</span>
           </div>
-          <div className="flex items-center gap-1">
+          {atmosphere && (
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm text-gray-600">{atmosphere}/5</span>
+            </div>
+          )}
+          {place && (
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-gray-600">{getCategoryEmoji(place)} {place}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1 ml-auto">
             <Heart className="h-4 w-4 text-gray-400" />
             <span className="text-sm text-gray-600">{likes}</span>
           </div>
         </div>
-        {(atmosphere || place) && (
-          <div className="mt-2 flex flex-col gap-1 text-sm text-gray-600">
-            {atmosphere && (
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-400" />
-                <span>Atmosphere: {atmosphere}/5</span>
-              </div>
-            )}
-            {place && (
-              <div className="flex items-center gap-1">
-                <span>Perfect for: {getCategoryEmoji(place)} {place}</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
