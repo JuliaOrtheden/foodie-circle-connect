@@ -7,11 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const Search = () => {
+const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const category = searchParams.get("category") || "people";
@@ -41,12 +41,17 @@ const Search = () => {
           .limit(20);
         return data || [];
       } else {
+        // Get unique restaurants from dishes table
         const { data } = await supabase
           .from("dishes")
-          .select("*")
+          .select("restaurant")
           .ilike("restaurant", `%${query}%`)
+          .not("restaurant", "is", null)
           .limit(20);
-        return data || [];
+        
+        // Remove duplicates
+        const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
+        return uniqueRestaurants.map(restaurant => ({ restaurant }));
       }
     },
     enabled: query.length > 0,
@@ -58,21 +63,39 @@ const Search = () => {
       return;
     }
 
-    const { error } = await supabase.from("subscriptions").insert({
-      user_id: user.id,
-      subscribed_to_restaurant: restaurantName,
-    });
+    try {
+      const existingSubscription = subscriptions?.find(
+        sub => sub.subscribed_to_restaurant === restaurantName
+      );
 
-    if (error) {
-      toast.error("Failed to subscribe to restaurant");
-    } else {
-      toast.success(`Subscribed to ${restaurantName}`);
+      if (existingSubscription) {
+        const { error } = await supabase
+          .from("subscriptions")
+          .delete()
+          .eq("id", existingSubscription.id);
+
+        if (error) throw error;
+        toast.success(`Unsubscribed from ${restaurantName}`);
+      } else {
+        const { error } = await supabase
+          .from("subscriptions")
+          .insert({
+            user_id: user.id,
+            subscribed_to_restaurant: restaurantName,
+          });
+
+        if (error) throw error;
+        toast.success(`Subscribed to ${restaurantName}`);
+      }
+    } catch (error) {
+      console.error("Error managing subscription:", error);
+      toast.error("Failed to update subscription");
     }
   };
 
   const isSubscribed = (restaurantName: string) => {
     return subscriptions?.some(
-      (sub) => sub.subscribed_to_restaurant === restaurantName
+      sub => sub.subscribed_to_restaurant === restaurantName
     );
   };
 
@@ -132,7 +155,7 @@ const Search = () => {
                         to={`/profile/${profile.id}`}
                         className="font-medium hover:underline"
                       >
-                        {profile.username}
+                        {profile.username || "Anonymous User"}
                       </Link>
                     </div>
                     <Button variant="outline">Connect</Button>
@@ -143,27 +166,27 @@ const Search = () => {
 
             <TabsContent value="restaurants" className="mt-6">
               <div className="space-y-4">
-                {searchResults?.map((dish: any) => (
+                {searchResults?.map((result: any) => (
                   <div
-                    key={dish.id}
+                    key={result.restaurant}
                     className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm"
                   >
                     <div className="flex-1">
                       <Link
-                        to={`/restaurant/${encodeURIComponent(dish.restaurant)}`}
+                        to={`/restaurant/${encodeURIComponent(result.restaurant)}`}
                         className="font-medium hover:underline"
                       >
-                        {dish.restaurant}
+                        {result.restaurant}
                       </Link>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleSubscribe(dish.restaurant)}
-                      className={isSubscribed(dish.restaurant) ? "text-red-500" : ""}
+                      onClick={() => handleSubscribe(result.restaurant)}
+                      className={isSubscribed(result.restaurant) ? "text-red-500" : ""}
                     >
                       <Heart
-                        className={isSubscribed(dish.restaurant) ? "fill-current" : ""}
+                        className={isSubscribed(result.restaurant) ? "fill-current" : ""}
                       />
                     </Button>
                   </div>
@@ -177,4 +200,4 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default SearchPage;
