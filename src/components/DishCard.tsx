@@ -1,9 +1,9 @@
 import { Heart, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DishCardProps {
   image: string;
@@ -18,24 +18,26 @@ export function DishCard({ image, name, restaurant, rating, likes, className }: 
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleRestaurantClick = async (restaurantName: string) => {
-    if (!user) {
-      toast.error("Please sign in to follow restaurants");
-      return;
-    }
+  const { data: subscription } = useQuery({
+    queryKey: ["restaurant-subscription", restaurant, user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("subscribed_to_restaurant", restaurant)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
-    try {
-      const { error } = await supabase.from("subscriptions").insert({
-        user_id: user.id,
-        subscribed_to_restaurant: restaurantName,
-      });
-
-      if (error) throw error;
-      toast.success(`Now following ${restaurantName}`);
-    } catch (error) {
-      console.error("Error following restaurant:", error);
-      toast.error("Failed to follow restaurant. Please try again.");
-    }
+  const handleRestaurantClick = () => {
+    navigate(`/restaurant/${encodeURIComponent(restaurant)}`);
   };
 
   return (
@@ -49,12 +51,17 @@ export function DishCard({ image, name, restaurant, rating, likes, className }: 
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-lg text-gray-900">{name}</h3>
-        <button
-          onClick={() => handleRestaurantClick(restaurant)}
-          className="text-sm text-primary hover:underline focus:outline-none"
-        >
-          {restaurant}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRestaurantClick}
+            className="text-sm text-primary hover:underline focus:outline-none"
+          >
+            {restaurant}
+          </button>
+          {subscription && (
+            <Heart className="h-4 w-4 fill-primary text-primary" />
+          )}
+        </div>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-primary text-primary" />
