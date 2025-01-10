@@ -20,6 +20,7 @@ export function DishForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [atmosphereRating, setAtmosphereRating] = useState<number>(0);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   useEffect(() => {
@@ -50,15 +51,17 @@ export function DishForm() {
     console.log('Starting submission with profile:', profile.id);
     console.log('Form data:', data);
     console.log('Selected rating:', selectedRating);
+    console.log('Atmosphere rating:', atmosphereRating);
     console.log('Image URL:', imageUrl);
 
-    const formDataWithRating = {
+    const formDataWithRatings = {
       ...data,
       rating: selectedRating || null,
+      atmosphere: atmosphereRating ? String(atmosphereRating) : null,
       user_id: profile.id,
     };
     
-    console.log('Prepared form data:', formDataWithRating);
+    console.log('Prepared form data:', formDataWithRatings);
     
     setIsLoading(true);
     try {
@@ -66,7 +69,7 @@ export function DishForm() {
       const { error, data: insertedData } = await supabase
         .from('dishes')
         .insert({
-          ...formDataWithRating,
+          ...formDataWithRatings,
           image_url: imageUrl,
         })
         .select()
@@ -83,6 +86,7 @@ export function DishForm() {
       reset();
       setImageUrl(null);
       setSelectedRating(0);
+      setAtmosphereRating(0);
     } catch (error) {
       console.error('Error in onSubmit:', error);
       toast.error("Failed to log dish. Please try again.");
@@ -109,6 +113,26 @@ export function DishForm() {
       );
     }
     return forks;
+  };
+
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <button
+          key={i}
+          type="button"
+          onClick={() => setAtmosphereRating(i)}
+          className={`text-2xl transition-all ${
+            i <= atmosphereRating ? 'opacity-100 scale-110' : 'opacity-50 scale-100'
+          } hover:scale-110 focus:outline-none`}
+          aria-label={`Rate atmosphere ${i} stars`}
+        >
+          ⭐
+        </button>
+      );
+    }
+    return stars;
   };
 
   return (
@@ -140,11 +164,21 @@ export function DishForm() {
       </div>
 
       <div className="space-y-2">
-        <Label>Rating</Label>
+        <Label>Dish Rating</Label>
         <div className="flex gap-2 items-center">
           {renderForks()}
           <span className="ml-2 text-sm text-gray-600">
             {selectedRating > 0 ? `${selectedRating} fork${selectedRating > 1 ? 's' : ''}` : 'No rating'}
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Atmosphere Rating (Optional)</Label>
+        <div className="flex gap-2 items-center">
+          {renderStars()}
+          <span className="ml-2 text-sm text-gray-600">
+            {atmosphereRating > 0 ? `${atmosphereRating} star${atmosphereRating > 1 ? 's' : ''}` : 'No rating'}
           </span>
         </div>
       </div>
