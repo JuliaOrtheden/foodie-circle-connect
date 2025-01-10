@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImageUpload } from "./ImageUpload";
+import { Label } from "@/components/ui/label";
 
 interface DishFormData {
   name: string;
@@ -19,10 +20,13 @@ export function DishForm() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const { register, handleSubmit, reset } = useForm<DishFormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   const onSubmit = async (data: DishFormData) => {
-    if (!user) return;
+    if (!user) {
+      toast.error("Please sign in to log a dish");
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -41,54 +45,81 @@ export function DishForm() {
       setImageUrl(null);
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to log dish");
+      toast.error("Failed to log dish. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="name">Dish Name *</Label>
         <Input
-          {...register("name", { required: true })}
-          placeholder="Dish name"
+          id="name"
+          {...register("name", { 
+            required: "Dish name is required",
+            minLength: { value: 2, message: "Name must be at least 2 characters" }
+          })}
+          placeholder="Enter dish name"
           className="w-full"
         />
+        {errors.name && (
+          <p className="text-sm text-red-500">{errors.name.message}</p>
+        )}
       </div>
-      <div>
+
+      <div className="space-y-2">
+        <Label htmlFor="restaurant">Restaurant</Label>
         <Input
+          id="restaurant"
           {...register("restaurant")}
-          placeholder="Restaurant (optional)"
+          placeholder="Where did you eat this dish?"
           className="w-full"
         />
       </div>
-      <div>
+
+      <div className="space-y-2">
+        <Label htmlFor="rating">Rating (1-5)</Label>
         <Input
+          id="rating"
           {...register("rating", { 
-            min: 1, 
-            max: 5,
+            min: { value: 1, message: "Rating must be at least 1" },
+            max: { value: 5, message: "Rating must not exceed 5" },
             valueAsNumber: true 
           })}
           type="number"
-          placeholder="Rating (1-5)"
+          placeholder="How would you rate this dish?"
           className="w-full"
         />
+        {errors.rating && (
+          <p className="text-sm text-red-500">{errors.rating.message}</p>
+        )}
       </div>
-      <div>
+
+      <div className="space-y-2">
+        <Label htmlFor="notes">Notes</Label>
         <Textarea
+          id="notes"
           {...register("notes")}
-          placeholder="Notes (optional)"
+          placeholder="Any additional thoughts about the dish?"
           className="w-full"
         />
       </div>
-      <div>
+
+      <div className="space-y-2">
+        <Label>Photo</Label>
         <ImageUpload
           onImageUpload={(url) => setImageUrl(url)}
-          onError={(error) => toast.error("Failed to upload image")}
+          onError={(error) => toast.error("Failed to upload image: " + error.message)}
         />
       </div>
-      <Button type="submit" disabled={isLoading}>
+
+      <Button 
+        type="submit" 
+        disabled={isLoading}
+        className="w-full"
+      >
         {isLoading ? "Logging..." : "Log Dish"}
       </Button>
     </form>
