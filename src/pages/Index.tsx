@@ -4,6 +4,9 @@ import { LoginButton } from "@/components/LoginButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { DishForm } from "@/components/DishForm";
 import { PreferencesForm } from "@/components/PreferencesForm";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Clock } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -24,7 +27,17 @@ const Index = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">FoodieCircle</h1>
             <p className="text-lg text-gray-600">Discover and share amazing dishes</p>
           </div>
-          <LoginButton />
+          <div className="flex items-center gap-4">
+            {user && (
+              <Button variant="outline" asChild>
+                <Link to="/timeline" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  View Timeline
+                </Link>
+              </Button>
+            )}
+            <LoginButton />
+          </div>
         </header>
         
         <main>
