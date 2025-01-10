@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,17 +22,28 @@ export function DishForm() {
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
+  useEffect(() => {
+    console.log('Auth state changed:', { user, profile, loading });
+  }, [user, profile, loading]);
+
   const onSubmit = async (data: DishFormData) => {
+    console.log('Starting form submission...');
+    console.log('Current auth state:', { user, profile, loading });
+
     if (loading) {
-      console.log('Auth state is still loading');
+      console.log('Auth state is still loading, waiting...');
       return;
     }
 
-    if (!user || !profile) {
-      console.log('No user or profile found, showing error toast');
-      console.log('User:', user);
-      console.log('Profile:', profile);
+    if (!user) {
+      console.log('No user found in auth state');
       toast.error("Please sign in to log a dish");
+      return;
+    }
+
+    if (!profile) {
+      console.log('No profile found for user:', user.id);
+      toast.error("Unable to find your profile. Please try signing out and back in.");
       return;
     }
 
