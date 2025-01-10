@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 interface DishFormData {
   name: string;
   restaurant?: string;
-  rating?: number;
   notes?: string;
 }
 
@@ -24,18 +23,19 @@ export function DishForm() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   const onSubmit = async (data: DishFormData) => {
-    const formDataWithRating = {
-      ...data,
-      rating: selectedRating
-    };
-    
-    console.log('Form submitted with data:', { ...formDataWithRating, imageUrl });
-    
     if (!user) {
       console.log('No user found, showing error toast');
       toast.error("Please sign in to log a dish");
       return;
     }
+
+    const formDataWithRating = {
+      ...data,
+      rating: selectedRating || null, // Ensure rating is null if not selected
+      user_id: user.id, // Explicitly set user_id
+    };
+    
+    console.log('Form submitted with data:', { ...formDataWithRating, imageUrl });
     
     setIsLoading(true);
     try {
@@ -44,7 +44,6 @@ export function DishForm() {
         .from('dishes')
         .insert({
           ...formDataWithRating,
-          user_id: user.id,
           image_url: imageUrl,
         })
         .select()
