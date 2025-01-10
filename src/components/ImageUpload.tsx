@@ -11,23 +11,31 @@ export function ImageUpload({ onImageUpload, onError }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const uploadImage = async (file: File) => {
+    console.log('Starting image upload:', file.name);
     const fileExt = file.name.split('.').pop();
     const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
     try {
       setIsUploading(true);
+      console.log('Uploading to path:', filePath);
+      
       const { error: uploadError } = await supabase.storage
         .from('dish-images')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('dish-images')
         .getPublicUrl(filePath);
 
+      console.log('Upload successful, public URL:', publicUrl);
       onImageUpload(publicUrl);
     } catch (error) {
+      console.error('Error in uploadImage:', error);
       onError(error as Error);
     } finally {
       setIsUploading(false);
@@ -36,6 +44,7 @@ export function ImageUpload({ onImageUpload, onError }: ImageUploadProps) {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      console.log('File selected:', e.target.files[0].name);
       uploadImage(e.target.files[0]);
     }
   };

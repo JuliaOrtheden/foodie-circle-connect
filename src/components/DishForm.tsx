@@ -23,28 +23,38 @@ export function DishForm() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<DishFormData>();
 
   const onSubmit = async (data: DishFormData) => {
+    console.log('Form submitted with data:', { ...data, imageUrl });
+    
     if (!user) {
+      console.log('No user found, showing error toast');
       toast.error("Please sign in to log a dish");
       return;
     }
     
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      console.log('Inserting dish into database...');
+      const { error, data: insertedData } = await supabase
         .from('dishes')
         .insert({
           ...data,
           user_id: user.id,
           image_url: imageUrl,
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
       
+      console.log('Dish inserted successfully:', insertedData);
       toast.success("Dish logged successfully!");
       reset();
       setImageUrl(null);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in onSubmit:', error);
       toast.error("Failed to log dish. Please try again.");
     } finally {
       setIsLoading(false);
@@ -110,8 +120,14 @@ export function DishForm() {
       <div className="space-y-2">
         <Label>Photo</Label>
         <ImageUpload
-          onImageUpload={(url) => setImageUrl(url)}
-          onError={(error) => toast.error("Failed to upload image: " + error.message)}
+          onImageUpload={(url) => {
+            console.log('Image uploaded, received URL:', url);
+            setImageUrl(url);
+          }}
+          onError={(error) => {
+            console.error('Image upload error:', error);
+            toast.error("Failed to upload image: " + error.message);
+          }}
         />
       </div>
 
