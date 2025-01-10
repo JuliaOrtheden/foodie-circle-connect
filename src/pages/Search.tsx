@@ -56,6 +56,18 @@ const SearchPage = () => {
   const { data: restaurantResults } = useQuery({
     queryKey: ["search", "restaurants", query, city, cuisine],
     queryFn: async () => {
+      // First, if cuisine is selected, get user_ids from taste_preferences
+      let userIdsWithCuisine: string[] = [];
+      if (cuisine) {
+        const { data: preferencesData } = await supabase
+          .from("taste_preferences")
+          .select("user_id")
+          .contains("favorite_cuisine", [cuisine]);
+        
+        userIdsWithCuisine = (preferencesData || []).map(p => p.user_id!);
+      }
+
+      // Then query dishes with all filters
       let query = supabase
         .from("dishes")
         .select("restaurant, place")
@@ -65,13 +77,8 @@ const SearchPage = () => {
         query = query.eq("place", city);
       }
 
-      if (cuisine) {
-        // Join with taste_preferences to filter by cuisine
-        query = query.in("restaurant", (qb) => 
-          qb.from("taste_preferences")
-            .select("favorite_cuisine")
-            .contains("favorite_cuisine", [cuisine])
-        );
+      if (cuisine && userIdsWithCuisine.length > 0) {
+        query = query.in("user_id", userIdsWithCuisine);
       }
 
       const { data } = await query.limit(20);
