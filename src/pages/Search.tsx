@@ -6,19 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/search/SearchInput";
+import { SearchFilters } from "@/components/search/SearchFilters";
 import { UsersList } from "@/components/search/UsersList";
-import { RestaurantsList, Restaurant } from "@/components/search/RestaurantsList";
-import { Tables } from "@/integrations/supabase/types";
+import { RestaurantsList } from "@/components/search/RestaurantsList";
 import { Button } from "@/components/ui/button";
 import { Clock, Search } from "lucide-react";
 import { LoginButton } from "@/components/LoginButton";
-
-type Profile = Tables<"profiles">;
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const category = searchParams.get("category") || "people";
+  const city = searchParams.get("city") || "";
+  const cuisine = searchParams.get("cuisine") || "";
   const { user } = useAuth();
 
   const { data: subscriptions } = useQuery({
@@ -34,7 +34,7 @@ const SearchPage = () => {
     enabled: !!user,
   });
 
-  const { data: userResults } = useQuery<Profile[]>({
+  const { data: userResults } = useQuery({
     queryKey: ["search", "people", query],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,21 +48,33 @@ const SearchPage = () => {
         return [];
       }
       
-      console.log("Fetched profiles:", data); // Debug log
       return data || [];
     },
     enabled: category === "people",
   });
 
-  const { data: restaurantResults } = useQuery<Restaurant[]>({
-    queryKey: ["search", "restaurants", query],
+  const { data: restaurantResults } = useQuery({
+    queryKey: ["search", "restaurants", query, city, cuisine],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from("dishes")
-        .select("restaurant")
-        .ilike("restaurant", query ? `%${query}%` : '%')
-        .not("restaurant", "is", null)
-        .limit(20);
+        .select("restaurant, place")
+        .not("restaurant", "is", null);
+
+      if (city) {
+        query = query.eq("place", city);
+      }
+
+      if (cuisine) {
+        // Join with taste_preferences to filter by cuisine
+        query = query.in("restaurant", (qb) => 
+          qb.from("taste_preferences")
+            .select("favorite_cuisine")
+            .contains("favorite_cuisine", [cuisine])
+        );
+      }
+
+      const { data } = await query.limit(20);
       
       const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
       return uniqueRestaurants.map(restaurant => ({ restaurant: restaurant! }));
@@ -116,6 +128,26 @@ const SearchPage = () => {
     setSearchParams({
       q: value,
       category,
+      city,
+      cuisine,
+    });
+  };
+
+  const handleCityChange = (value: string) => {
+    setSearchParams({
+      q: query,
+      category,
+      city: value,
+      cuisine,
+    });
+  };
+
+  const handleCuisineChange = (value: string) => {
+    setSearchParams({
+      q: query,
+      category,
+      city,
+      cuisine: value,
     });
   };
 
@@ -144,8 +176,16 @@ const SearchPage = () => {
         </header>
 
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="flex gap-4">
+          <div className="space-y-4">
             <SearchInput value={query} onChange={handleSearch} />
+            {category === "restaurants" && (
+              <SearchFilters
+                city={city}
+                cuisine={cuisine}
+                onCityChange={handleCityChange}
+                onCuisineChange={handleCuisineChange}
+              />
+            )}
           </div>
 
           <Tabs
@@ -154,6 +194,8 @@ const SearchPage = () => {
               setSearchParams({
                 q: query,
                 category: value,
+                city,
+                cuisine,
               })
             }
           >
