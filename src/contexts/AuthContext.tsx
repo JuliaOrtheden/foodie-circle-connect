@@ -31,19 +31,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       console.log('Fetching profile for user:', userId);
-      const { data, error } = await supabase
+      
+      // Try to get the existing profile
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        throw error;
+      if (fetchError) {
+        console.error('Error fetching profile:', fetchError);
+        throw fetchError;
       }
 
-      if (!data) {
-        console.log('No profile found, attempting to create one');
+      if (!existingProfile) {
+        console.log('No profile found, creating one...');
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
           .insert({ id: userId })
@@ -58,8 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('New profile created:', newProfile);
         setProfile(newProfile);
       } else {
-        console.log('Profile found:', data);
-        setProfile(data);
+        console.log('Profile found:', existingProfile);
+        setProfile(existingProfile);
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
