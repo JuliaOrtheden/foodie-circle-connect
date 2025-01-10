@@ -10,6 +10,8 @@ const FRIENDS_POSTS = [
     rating: 4.5,
     likes: 42,
     timeAgo: "2h ago",
+    atmosphere: "4.3",
+    place: "date",
   },
   {
     id: 2,
@@ -20,6 +22,8 @@ const FRIENDS_POSTS = [
     rating: 4.6,
     likes: 38,
     timeAgo: "5h ago",
+    atmosphere: "4.7",
+    place: "family gatherings",
   },
 ];
 

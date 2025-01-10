@@ -8,6 +8,8 @@ const POPULAR_DISHES = [
     restaurant: "La Cucina",
     rating: 4.8,
     likes: 234,
+    atmosphere: "4.2",
+    place: "date",
   },
   {
     id: 2,
@@ -16,6 +18,8 @@ const POPULAR_DISHES = [
     restaurant: "Gourmet Bites",
     rating: 4.7,
     likes: 189,
+    atmosphere: "4.5",
+    place: "business dinner",
   },
   {
     id: 3,
@@ -24,6 +28,8 @@ const POPULAR_DISHES = [
     restaurant: "Sweet Dreams",
     rating: 4.9,
     likes: 312,
+    atmosphere: "4.8",
+    place: "going out with friends",
   },
 ];
 
