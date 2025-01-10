@@ -18,7 +18,13 @@ export const SubscriptionManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("*, subscribed_to_user_id(username), subscribed_to_restaurant")
+        .select(`
+          id,
+          subscribed_to_user_id (
+            username
+          ),
+          subscribed_to_restaurant
+        `)
         .eq("user_id", user?.id);
 
       if (error) throw error;
