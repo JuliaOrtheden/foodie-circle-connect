@@ -7,6 +7,7 @@ import { Heart, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const Restaurant = () => {
   const { restaurantName } = useParams();
