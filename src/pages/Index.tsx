@@ -4,10 +4,9 @@ import { LoginButton } from "@/components/LoginButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { DishForm } from "@/components/DishForm";
 import { PreferencesForm } from "@/components/PreferencesForm";
-import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Clock, Search } from "lucide-react";
+import { Clock, Search, User } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -36,12 +35,20 @@ const Index = () => {
               </Link>
             </Button>
             {user && (
-              <Button variant="outline" asChild>
-                <Link to="/timeline" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  View Timeline
-                </Link>
-              </Button>
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/timeline" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    View Timeline
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Profile
+                  </Link>
+                </Button>
+              </>
             )}
             <LoginButton />
           </div>
@@ -61,10 +68,6 @@ const Index = () => {
                 </section>
               </div>
               <div className="space-y-8">
-                <section className="bg-white p-6 rounded-lg shadow">
-                  <h2 className="text-2xl font-semibold mb-4">Subscriptions</h2>
-                  <SubscriptionManager />
-                </section>
                 <PopularDishes />
                 <FriendsFeed />
               </div>
