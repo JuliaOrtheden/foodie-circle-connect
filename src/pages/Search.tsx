@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { Heart, Search } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -37,24 +36,21 @@ const SearchPage = () => {
         const { data } = await supabase
           .from("profiles")
           .select("*")
-          .ilike("username", `%${query}%`)
+          .ilike("username", query ? `%${query}%` : '%')
           .limit(20);
         return data || [];
       } else {
-        // Get unique restaurants from dishes table
         const { data } = await supabase
           .from("dishes")
           .select("restaurant")
-          .ilike("restaurant", `%${query}%`)
+          .ilike("restaurant", query ? `%${query}%` : '%')
           .not("restaurant", "is", null)
           .limit(20);
         
-        // Remove duplicates
         const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
         return uniqueRestaurants.map(restaurant => ({ restaurant }));
       }
     },
-    enabled: query.length > 0,
   });
 
   const handleSubscribe = async (restaurantName: string) => {
@@ -158,7 +154,6 @@ const SearchPage = () => {
                         {profile.username || "Anonymous User"}
                       </Link>
                     </div>
-                    <Button variant="outline">Connect</Button>
                   </div>
                 ))}
               </div>
@@ -179,16 +174,16 @@ const SearchPage = () => {
                         {result.restaurant}
                       </Link>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <button
                       onClick={() => handleSubscribe(result.restaurant)}
-                      className={isSubscribed(result.restaurant) ? "text-red-500" : ""}
+                      className={`p-2 rounded-full hover:bg-gray-100 ${
+                        isSubscribed(result.restaurant) ? "text-red-500" : ""
+                      }`}
                     >
                       <Heart
                         className={isSubscribed(result.restaurant) ? "fill-current" : ""}
                       />
-                    </Button>
+                    </button>
                   </div>
                 ))}
               </div>
