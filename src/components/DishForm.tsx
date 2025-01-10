@@ -29,13 +29,18 @@ export function DishForm() {
       return;
     }
 
+    console.log('Starting submission with user:', user.id);
+    console.log('Form data:', data);
+    console.log('Selected rating:', selectedRating);
+    console.log('Image URL:', imageUrl);
+
     const formDataWithRating = {
       ...data,
-      rating: selectedRating || null, // Ensure rating is null if not selected
-      user_id: user.id, // Explicitly set user_id
+      rating: selectedRating || null,
+      user_id: user.id,
     };
     
-    console.log('Form submitted with data:', { ...formDataWithRating, imageUrl });
+    console.log('Prepared form data:', formDataWithRating);
     
     setIsLoading(true);
     try {
@@ -51,7 +56,8 @@ export function DishForm() {
 
       if (error) {
         console.error('Database error:', error);
-        throw error;
+        toast.error(`Failed to log dish: ${error.message}`);
+        return;
       }
       
       console.log('Dish inserted successfully:', insertedData);
