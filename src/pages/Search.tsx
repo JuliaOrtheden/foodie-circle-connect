@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { SearchInput } from "@/components/search/SearchInput";
+import { UsersList } from "@/components/search/UsersList";
+import { RestaurantsList } from "@/components/search/RestaurantsList";
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -95,23 +94,19 @@ const SearchPage = () => {
     );
   };
 
+  const handleSearch = (value: string) => {
+    setSearchParams({
+      q: value,
+      category,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="flex gap-4">
-            <Input
-              type="search"
-              placeholder="Search..."
-              value={query}
-              onChange={(e) =>
-                setSearchParams({
-                  q: e.target.value,
-                  category,
-                })
-              }
-              className="flex-1"
-            />
+            <SearchInput value={query} onChange={handleSearch} />
           </div>
 
           <Tabs
@@ -139,54 +134,15 @@ const SearchPage = () => {
             </TabsList>
 
             <TabsContent value="people" className="mt-6">
-              <div className="space-y-4">
-                {searchResults?.map((profile: any) => (
-                  <div
-                    key={profile.id}
-                    className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm"
-                  >
-                    <Avatar className="h-12 w-12" />
-                    <div className="flex-1">
-                      <Link
-                        to={`/profile/${profile.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {profile.username || "Anonymous User"}
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <UsersList profiles={searchResults || []} />
             </TabsContent>
 
             <TabsContent value="restaurants" className="mt-6">
-              <div className="space-y-4">
-                {searchResults?.map((result: any) => (
-                  <div
-                    key={result.restaurant}
-                    className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm"
-                  >
-                    <div className="flex-1">
-                      <Link
-                        to={`/restaurant/${encodeURIComponent(result.restaurant)}`}
-                        className="font-medium hover:underline"
-                      >
-                        {result.restaurant}
-                      </Link>
-                    </div>
-                    <button
-                      onClick={() => handleSubscribe(result.restaurant)}
-                      className={`p-2 rounded-full hover:bg-gray-100 ${
-                        isSubscribed(result.restaurant) ? "text-red-500" : ""
-                      }`}
-                    >
-                      <Heart
-                        className={isSubscribed(result.restaurant) ? "fill-current" : ""}
-                      />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <RestaurantsList 
+                restaurants={searchResults || []} 
+                onSubscribe={handleSubscribe}
+                isSubscribed={isSubscribed}
+              />
             </TabsContent>
           </Tabs>
         </div>
