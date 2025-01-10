@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,9 @@ import { SearchInput } from "@/components/search/SearchInput";
 import { UsersList } from "@/components/search/UsersList";
 import { RestaurantsList, Restaurant } from "@/components/search/RestaurantsList";
 import { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Clock, Search } from "lucide-react";
+import { LoginButton } from "@/components/LoginButton";
 
 type Profile = Tables<"profiles">;
 
@@ -34,11 +37,18 @@ const SearchPage = () => {
   const { data: userResults } = useQuery<Profile[]>({
     queryKey: ["search", "people", query],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .ilike("username", query ? `%${query}%` : '%')
         .limit(20);
+      
+      if (error) {
+        console.error("Error fetching profiles:", error);
+        return [];
+      }
+      
+      console.log("Fetched profiles:", data); // Debug log
       return data || [];
     },
     enabled: category === "people",
@@ -112,6 +122,27 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
+        {/* Header section */}
+        <header className="flex justify-between items-center mb-12">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <Link to="/">FoodieCircle</Link>
+            </h1>
+            <p className="text-lg text-gray-600">Discover and share amazing dishes</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {user && (
+              <Button variant="outline" asChild>
+                <Link to="/timeline" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  View Timeline
+                </Link>
+              </Button>
+            )}
+            <LoginButton />
+          </div>
+        </header>
+
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="flex gap-4">
             <SearchInput value={query} onChange={handleSearch} />
