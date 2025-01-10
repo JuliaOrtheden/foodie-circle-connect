@@ -6,7 +6,7 @@ import { DishCard } from "@/components/DishCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 
 type Dish = Database['public']['Tables']['dishes']['Row'];
@@ -47,6 +47,17 @@ const Timeline = () => {
     }, {});
   };
 
+  const getCategoryEmoji = (category: string) => {
+    const categories: Record<string, string> = {
+      'date': '💑',
+      'after work': '🍺',
+      'business dinner': '💼',
+      'going out with friends': '👥',
+      'family gatherings': '🏠'
+    };
+    return categories[category] || '';
+  };
+
   const groupedDishes = dishes ? groupDishesByDate(dishes) : {};
 
   return (
@@ -68,14 +79,34 @@ const Timeline = () => {
             <Separator className="mb-4" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dishes.map((dish: Dish) => (
-                <DishCard
-                  key={dish.id}
-                  image={dish.image_url || "/placeholder.svg"}
-                  name={dish.name}
-                  restaurant={dish.restaurant || "Unknown Restaurant"}
-                  rating={dish.rating || 0}
-                  likes={0}
-                />
+                <div key={dish.id} className="space-y-2">
+                  <DishCard
+                    image={dish.image_url || "/placeholder.svg"}
+                    name={dish.name}
+                    restaurant={dish.restaurant || "Unknown Restaurant"}
+                    rating={dish.rating || 0}
+                    likes={0}
+                  />
+                  {(dish.atmosphere || dish.place) && (
+                    <div className="px-4 py-2 bg-white rounded-lg shadow-sm">
+                      {dish.atmosphere && (
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4 text-yellow-400" />
+                          <span className="text-sm text-gray-600">
+                            Atmosphere: {dish.atmosphere}/5
+                          </span>
+                        </div>
+                      )}
+                      {dish.place && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-gray-600">
+                            Perfect for: {getCategoryEmoji(dish.place)} {dish.place}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>

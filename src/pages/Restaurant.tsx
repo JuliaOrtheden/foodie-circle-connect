@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DishCard } from "@/components/DishCard";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft } from "lucide-react";
+import { Heart, ArrowLeft, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -42,6 +42,39 @@ const Restaurant = () => {
       return data;
     },
   });
+
+  // Calculate mean atmosphere rating and get atmosphere categories
+  const atmosphereStats = dishes?.reduce((acc, dish) => {
+    if (dish.atmosphere) {
+      acc.totalRating += parseInt(dish.atmosphere);
+      acc.count += 1;
+    }
+    if (dish.place && !acc.categories[dish.place]) {
+      acc.categories[dish.place] = 1;
+    } else if (dish.place) {
+      acc.categories[dish.place] += 1;
+    }
+    return acc;
+  }, { totalRating: 0, count: 0, categories: {} as Record<string, number> });
+
+  const meanAtmosphere = atmosphereStats?.count ? 
+    (atmosphereStats.totalRating / atmosphereStats.count).toFixed(1) : 
+    null;
+
+  const mostCommonCategory = atmosphereStats?.categories ? 
+    Object.entries(atmosphereStats.categories).sort((a, b) => b[1] - a[1])[0]?.[0] : 
+    null;
+
+  const getCategoryEmoji = (category: string) => {
+    const categories: Record<string, string> = {
+      'date': '💑',
+      'after work': '🍺',
+      'business dinner': '💼',
+      'going out with friends': '👥',
+      'family gatherings': '🏠'
+    };
+    return categories[category] || '';
+  };
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -86,7 +119,24 @@ const Restaurant = () => {
       </div>
 
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">{restaurantName}</h1>
+        <div>
+          <h1 className="text-3xl font-bold">{restaurantName}</h1>
+          {meanAtmosphere && (
+            <div className="flex items-center gap-2 mt-2">
+              <Star className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm text-gray-600">
+                Atmosphere: {meanAtmosphere}/5
+              </span>
+            </div>
+          )}
+          {mostCommonCategory && (
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-sm text-gray-600">
+                Best for: {getCategoryEmoji(mostCommonCategory)} {mostCommonCategory}
+              </span>
+            </div>
+          )}
+        </div>
         <Button
           variant="outline"
           onClick={handleSubscribe}
