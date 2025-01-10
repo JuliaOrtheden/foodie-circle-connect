@@ -7,7 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/search/SearchInput";
 import { UsersList } from "@/components/search/UsersList";
-import { RestaurantsList } from "@/components/search/RestaurantsList";
+import { RestaurantsList, Restaurant } from "@/components/search/RestaurantsList";
+import { Tables } from "@/integrations/supabase/types";
+
+type Profile = Tables<"profiles">;
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,28 +31,33 @@ const SearchPage = () => {
     enabled: !!user,
   });
 
-  const { data: searchResults } = useQuery({
-    queryKey: ["search", category, query],
+  const { data: userResults } = useQuery<Profile[]>({
+    queryKey: ["search", "people", query],
     queryFn: async () => {
-      if (category === "people") {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .ilike("username", query ? `%${query}%` : '%')
-          .limit(20);
-        return data || [];
-      } else {
-        const { data } = await supabase
-          .from("dishes")
-          .select("restaurant")
-          .ilike("restaurant", query ? `%${query}%` : '%')
-          .not("restaurant", "is", null)
-          .limit(20);
-        
-        const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
-        return uniqueRestaurants.map(restaurant => ({ restaurant }));
-      }
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .ilike("username", query ? `%${query}%` : '%')
+        .limit(20);
+      return data || [];
     },
+    enabled: category === "people",
+  });
+
+  const { data: restaurantResults } = useQuery<Restaurant[]>({
+    queryKey: ["search", "restaurants", query],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("dishes")
+        .select("restaurant")
+        .ilike("restaurant", query ? `%${query}%` : '%')
+        .not("restaurant", "is", null)
+        .limit(20);
+      
+      const uniqueRestaurants = [...new Set(data?.map(d => d.restaurant))];
+      return uniqueRestaurants.map(restaurant => ({ restaurant: restaurant! }));
+    },
+    enabled: category === "restaurants",
   });
 
   const handleSubscribe = async (restaurantName: string) => {
@@ -134,12 +142,12 @@ const SearchPage = () => {
             </TabsList>
 
             <TabsContent value="people" className="mt-6">
-              <UsersList profiles={searchResults || []} />
+              <UsersList profiles={userResults || []} />
             </TabsContent>
 
             <TabsContent value="restaurants" className="mt-6">
               <RestaurantsList 
-                restaurants={searchResults || []} 
+                restaurants={restaurantResults || []} 
                 onSubscribe={handleSubscribe}
                 isSubscribed={isSubscribed}
               />

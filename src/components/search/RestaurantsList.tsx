@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 
-interface Restaurant {
+export interface Restaurant {
   restaurant: string;
 }
 

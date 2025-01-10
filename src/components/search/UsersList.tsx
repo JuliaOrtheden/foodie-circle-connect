@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/avatar";
+import { Tables } from "@/integrations/supabase/types";
 
-interface Profile {
-  id: string;
-  username: string | null;
-}
+type Profile = Tables<"profiles">;
 
 interface UsersListProps {
   profiles: Profile[];
