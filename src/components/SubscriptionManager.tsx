@@ -11,7 +11,7 @@ type Subscription = {
   id: string;
   subscribed_to_user_id: string | null;
   subscribed_to_restaurant: string | null;
-  profiles: {
+  subscriber: {
     username: string;
   } | null;
 };
@@ -31,7 +31,7 @@ export const SubscriptionManager = () => {
           id,
           subscribed_to_user_id,
           subscribed_to_restaurant,
-          profiles:subscribed_to_user_id (
+          subscriber:profiles!subscribed_to_user_id (
             username
           )
         `)
@@ -158,8 +158,8 @@ export const SubscriptionManager = () => {
               className="flex justify-between items-center p-3 bg-secondary rounded-lg"
             >
               <span>
-                {sub.profiles
-                  ? `User: ${sub.profiles.username}`
+                {sub.subscriber
+                  ? `User: ${sub.subscriber.username}`
                   : `Restaurant: ${sub.subscribed_to_restaurant}`}
               </span>
               <Button
