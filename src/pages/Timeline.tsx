@@ -7,6 +7,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type Dish = Database['public']['Tables']['dishes']['Row'];
 
 const Timeline = () => {
   const { user } = useAuth();
@@ -33,8 +36,8 @@ const Timeline = () => {
     );
   }
 
-  const groupDishesByDate = (dishes: any[]) => {
-    return dishes.reduce((groups: { [key: string]: any[] }, dish) => {
+  const groupDishesByDate = (dishes: Dish[]) => {
+    return dishes.reduce((groups: { [key: string]: Dish[] }, dish) => {
       const date = format(new Date(dish.created_at), "MMMM d, yyyy");
       if (!groups[date]) {
         groups[date] = [];
@@ -64,7 +67,7 @@ const Timeline = () => {
             <h2 className="text-xl font-semibold mb-4">{date}</h2>
             <Separator className="mb-4" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {dishes.map((dish: any) => (
+              {dishes.map((dish: Dish) => (
                 <DishCard
                   key={dish.id}
                   image={dish.image_url || "/placeholder.svg"}
