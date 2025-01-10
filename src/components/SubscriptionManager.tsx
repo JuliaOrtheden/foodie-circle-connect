@@ -7,13 +7,21 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserPlus, Store } from "lucide-react";
 
+type Subscription = {
+  id: string;
+  subscribed_to_user_id: {
+    username: string;
+  } | null;
+  subscribed_to_restaurant: string | null;
+};
+
 export const SubscriptionManager = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [restaurant, setRestaurant] = useState("");
   const [username, setUsername] = useState("");
 
-  const { data: subscriptions } = useQuery({
+  const { data: subscriptions } = useQuery<Subscription[]>({
     queryKey: ["subscriptions", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
