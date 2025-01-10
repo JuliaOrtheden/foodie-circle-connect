@@ -1,4 +1,4 @@
-import { Heart, Star } from "lucide-react";
+import { Heart, Star, Utensils } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -86,7 +86,7 @@ export function DishCard({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-primary text-primary" />
+            <Utensils className="h-4 w-4 fill-primary text-primary" />
             <span className="text-sm font-medium">{rating}</span>
           </div>
           {atmosphere && (
