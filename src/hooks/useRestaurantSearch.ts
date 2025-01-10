@@ -21,6 +21,11 @@ export const useRestaurantSearch = (query: string, city: string, cuisine: string
         .select("restaurant, atmosphere")
         .not("restaurant", "is", null);
 
+      // Add text search filter
+      if (query) {
+        queryBuilder = queryBuilder.ilike("restaurant", `%${query}%`);
+      }
+
       if (city) {
         queryBuilder = queryBuilder.eq("place", city);
       }
