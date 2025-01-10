@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
+import { PreferencesForm } from "@/components/PreferencesForm";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Clock, Search } from "lucide-react";
@@ -38,6 +39,11 @@ const Profile = () => {
           </div>
           <div className="flex items-center gap-4">
             <Button variant="outline" asChild>
+              <Link to="/" className="flex items-center gap-2">
+                Home
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link to="/search" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 Search
@@ -53,7 +59,12 @@ const Profile = () => {
           </div>
         </header>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <section className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-semibold mb-4">Your Taste Preferences</h2>
+            <PreferencesForm />
+          </section>
+          
           <section className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-2xl font-semibold mb-4">Your Subscriptions</h2>
             <SubscriptionManager />

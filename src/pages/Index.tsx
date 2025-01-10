@@ -3,7 +3,6 @@ import { FriendsFeed } from "@/components/FriendsFeed";
 import { LoginButton } from "@/components/LoginButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { DishForm } from "@/components/DishForm";
-import { PreferencesForm } from "@/components/PreferencesForm";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Clock, Search, User } from "lucide-react";
@@ -61,10 +60,6 @@ const Index = () => {
                 <section className="bg-white p-6 rounded-lg shadow">
                   <h2 className="text-2xl font-semibold mb-4">Log a Dish</h2>
                   <DishForm />
-                </section>
-                <section className="bg-white p-6 rounded-lg shadow">
-                  <h2 className="text-2xl font-semibold mb-4">Your Taste Preferences</h2>
-                  <PreferencesForm />
                 </section>
               </div>
               <div className="space-y-8">
