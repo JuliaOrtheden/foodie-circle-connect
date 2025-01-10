@@ -11,31 +11,37 @@ export type Database = {
     Tables: {
       dishes: {
         Row: {
+          atmosphere: string | null
           created_at: string
           id: string
           image_url: string | null
           name: string
           notes: string | null
+          place: string | null
           rating: number | null
           restaurant: string | null
           user_id: string | null
         }
         Insert: {
+          atmosphere?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
           name: string
           notes?: string | null
+          place?: string | null
           rating?: number | null
           restaurant?: string | null
           user_id?: string | null
         }
         Update: {
+          atmosphere?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
           name?: string
           notes?: string | null
+          place?: string | null
           rating?: number | null
           restaurant?: string | null
           user_id?: string | null
@@ -112,6 +118,45 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          subscribed_to_user_id: string | null
+          subscribed_to_restaurant: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          subscribed_to_user_id?: string | null
+          subscribed_to_restaurant?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          subscribed_to_user_id?: string | null
+          subscribed_to_restaurant?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_subscribed_to_user_id_fkey"
+            columns: ["subscribed_to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -137,7 +182,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -191,8 +236,8 @@ export type TablesUpdate<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
+      Update: infer U
+    }
       ? U
       : never
     : never
