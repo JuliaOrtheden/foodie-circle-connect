@@ -11,10 +11,21 @@ interface DishCardProps {
   restaurant: string;
   rating: number;
   likes: number;
+  atmosphere?: string;
+  place?: string;
   className?: string;
 }
 
-export function DishCard({ image, name, restaurant, rating, likes, className }: DishCardProps) {
+export function DishCard({ 
+  image, 
+  name, 
+  restaurant, 
+  rating, 
+  likes, 
+  atmosphere,
+  place,
+  className 
+}: DishCardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -38,6 +49,17 @@ export function DishCard({ image, name, restaurant, rating, likes, className }: 
 
   const handleRestaurantClick = () => {
     navigate(`/restaurant/${encodeURIComponent(restaurant)}`);
+  };
+
+  const getCategoryEmoji = (category: string) => {
+    const categories: Record<string, string> = {
+      'date': '💑',
+      'after work': '🍺',
+      'business dinner': '💼',
+      'going out with friends': '👥',
+      'family gatherings': '🏠'
+    };
+    return categories[category] || '';
   };
 
   return (
@@ -72,6 +94,21 @@ export function DishCard({ image, name, restaurant, rating, likes, className }: 
             <span className="text-sm text-gray-600">{likes}</span>
           </div>
         </div>
+        {(atmosphere || place) && (
+          <div className="mt-2 flex flex-col gap-1 text-sm text-gray-600">
+            {atmosphere && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 text-yellow-400" />
+                <span>Atmosphere: {atmosphere}/5</span>
+              </div>
+            )}
+            {place && (
+              <div className="flex items-center gap-1">
+                <span>Perfect for: {getCategoryEmoji(place)} {place}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
