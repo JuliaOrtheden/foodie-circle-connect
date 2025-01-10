@@ -6,18 +6,21 @@ export const useSearchState = () => {
   const category = searchParams.get("category") || "people";
   const city = searchParams.get("city") || "";
   const cuisine = searchParams.get("cuisine") || "";
+  const atmosphere = searchParams.get("atmosphere") || "";
 
   const updateSearch = (params: {
     q?: string;
     category?: string;
     city?: string;
     cuisine?: string;
+    atmosphere?: string;
   }) => {
     setSearchParams({
       q: params.q ?? query,
       category: params.category ?? category,
       city: params.city ?? city,
       cuisine: params.cuisine ?? cuisine,
+      atmosphere: params.atmosphere ?? atmosphere,
     });
   };
 
@@ -26,6 +29,7 @@ export const useSearchState = () => {
     category,
     city,
     cuisine,
+    atmosphere,
     updateSearch,
   };
 };

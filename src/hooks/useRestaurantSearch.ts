@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Restaurant } from "@/components/search/RestaurantsList";
 
-export const useRestaurantSearch = (query: string, city: string, cuisine: string) => {
+export const useRestaurantSearch = (query: string, city: string, cuisine: string, atmosphere: string) => {
   return useQuery({
-    queryKey: ["search", "restaurants", query, city, cuisine],
+    queryKey: ["search", "restaurants", query, city, cuisine, atmosphere],
     queryFn: async () => {
       let userIdsWithCuisine: string[] = [];
       if (cuisine) {
@@ -23,6 +23,10 @@ export const useRestaurantSearch = (query: string, city: string, cuisine: string
 
       if (city) {
         queryBuilder = queryBuilder.eq("place", city);
+      }
+
+      if (atmosphere) {
+        queryBuilder = queryBuilder.eq("place", atmosphere);
       }
 
       if (cuisine && userIdsWithCuisine.length > 0) {

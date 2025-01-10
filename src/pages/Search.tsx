@@ -14,10 +14,10 @@ import { useRestaurantSearch } from "@/hooks/useRestaurantSearch";
 import { useRestaurantSubscriptions } from "@/hooks/useRestaurantSubscriptions";
 
 const SearchPage = () => {
-  const { query, category, city, cuisine, updateSearch } = useSearchState();
+  const { query, category, city, cuisine, atmosphere, updateSearch } = useSearchState();
   const { user } = useAuth();
   const { data: userResults } = useUserSearch(query);
-  const { data: restaurantResults } = useRestaurantSearch(query, city, cuisine);
+  const { data: restaurantResults } = useRestaurantSearch(query, city, cuisine, atmosphere);
   const { handleSubscribe, isSubscribed } = useRestaurantSubscriptions();
 
   return (
@@ -54,8 +54,10 @@ const SearchPage = () => {
               <SearchFilters
                 city={city}
                 cuisine={cuisine}
+                atmosphere={atmosphere}
                 onCityChange={(value) => updateSearch({ city: value })}
                 onCuisineChange={(value) => updateSearch({ cuisine: value })}
+                onAtmosphereChange={(value) => updateSearch({ atmosphere: value })}
               />
             )}
           </div>
