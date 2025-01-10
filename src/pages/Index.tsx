@@ -7,7 +7,7 @@ import { PreferencesForm } from "@/components/PreferencesForm";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Clock } from "lucide-react";
+import { Clock, Search } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -29,6 +29,12 @@ const Index = () => {
             <p className="text-lg text-gray-600">Discover and share amazing dishes</p>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="outline" asChild>
+              <Link to="/search" className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                Search
+              </Link>
+            </Button>
             {user && (
               <Button variant="outline" asChild>
                 <Link to="/timeline" className="flex items-center gap-2">
