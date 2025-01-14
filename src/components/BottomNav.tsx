@@ -1,4 +1,4 @@
-import { Home, MapPin, Award, User } from "lucide-react";
+import { Home, MapPin, Clock, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export function BottomNav() {
@@ -18,8 +18,8 @@ export function BottomNav() {
           <span className="text-xs mt-1">Explore</span>
         </Link>
         <Link to="/timeline" className={`flex flex-col items-center ${isActive('/timeline') ? 'text-primary' : 'text-gray-500'}`}>
-          <Award className="h-6 w-6" />
-          <span className="text-xs mt-1">Badges</span>
+          <Clock className="h-6 w-6" />
+          <span className="text-xs mt-1">Timeline</span>
         </Link>
         <Link to="/profile" className={`flex flex-col items-center ${isActive('/profile') ? 'text-primary' : 'text-gray-500'}`}>
           <User className="h-6 w-6" />
