@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import { Toaster } from "./components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
+import { DishForm } from "./components/DishForm";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/restaurant/:name" element={<Restaurant />} />
             <Route path="/timeline" element={<Timeline />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/log-dish" element={<div className="p-4 max-w-2xl mx-auto"><DishForm /></div>} />
           </Routes>
         </Router>
         <Toaster />
