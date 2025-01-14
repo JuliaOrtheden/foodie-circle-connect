@@ -58,12 +58,12 @@ export const SearchFilters = ({
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
-        <Select value={city} onValueChange={onCityChange}>
+        <Select value={city === "" ? "all" : city} onValueChange={value => onCityChange(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by city" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All cities</SelectItem>
+            <SelectItem value="all">All cities</SelectItem>
             {cities?.map((city) => (
               <SelectItem key={city} value={city}>
                 {city}
@@ -72,12 +72,12 @@ export const SearchFilters = ({
           </SelectContent>
         </Select>
 
-        <Select value={cuisine} onValueChange={onCuisineChange}>
+        <Select value={cuisine === "" ? "all" : cuisine} onValueChange={value => onCuisineChange(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by cuisine" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All cuisines</SelectItem>
+            <SelectItem value="all">All cuisines</SelectItem>
             {cuisines?.map((cuisine) => (
               <SelectItem key={cuisine} value={cuisine}>
                 {cuisine}
