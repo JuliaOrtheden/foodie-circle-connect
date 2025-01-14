@@ -58,12 +58,11 @@ export const SearchFilters = ({
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
-        <Select value={city === "" ? "all" : city} onValueChange={value => onCityChange(value === "all" ? "" : value)}>
+        <Select value={city} onValueChange={onCityChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by city" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All cities</SelectItem>
             {cities?.map((city) => (
               <SelectItem key={city} value={city}>
                 {city}
