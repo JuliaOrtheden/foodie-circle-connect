@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 export const useSearchState = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const category = searchParams.get("category") || "people";
+  const category = searchParams.get("category") || "restaurants";
   const city = searchParams.get("city") || "";
   const cuisine = searchParams.get("cuisine") || "";
   const atmosphere = searchParams.get("atmosphere") || "";
