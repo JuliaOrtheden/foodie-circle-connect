@@ -31,7 +31,7 @@ const Index = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold mb-4">Sign in to start sharing your culinary adventures</h2>
+            <h2 className="text-2xl font-semibold mb-4">Sign in to TasteBud to start sharing your culinary adventures</h2>
             <p className="text-gray-600 mb-8">Join our community of food enthusiasts</p>
           </div>
         )}
