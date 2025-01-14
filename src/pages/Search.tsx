@@ -31,15 +31,7 @@ const SearchPage = () => {
             </h1>
             <p className="text-lg text-gray-600">Discover and share amazing dishes</p>
           </div>
-          <div className="flex items-center gap-4">
-            {user && (
-              <Button variant="outline" asChild>
-                <Link to="/timeline" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  View Timeline
-                </Link>
-              </Button>
-            )}
+          <div className="flex items-center">
             <LoginButton />
           </div>
         </header>
