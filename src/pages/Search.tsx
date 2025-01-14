@@ -5,12 +5,13 @@ import { SearchInput } from "@/components/search/SearchInput";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { UsersList } from "@/components/search/UsersList";
 import { RestaurantsList } from "@/components/search/RestaurantsList";
+import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
 import { LoginButton } from "@/components/LoginButton";
 import { useSearchState } from "@/hooks/useSearchState";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import { useRestaurantSearch } from "@/hooks/useRestaurantSearch";
 import { useRestaurantSubscriptions } from "@/hooks/useRestaurantSubscriptions";
-import Map from "@/components/search/Map";
 
 const SearchPage = () => {
   const { query, category, city, cuisine, atmosphere, updateSearch } = useSearchState();
@@ -77,20 +78,11 @@ const SearchPage = () => {
             </TabsContent>
 
             <TabsContent value="restaurants" className="mt-6">
-              {restaurantResults && restaurantResults.length > 0 ? (
-                <RestaurantsList 
-                  restaurants={restaurantResults} 
-                  onSubscribe={handleSubscribe}
-                  isSubscribed={isSubscribed}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-center text-gray-600">
-                    {query ? "No restaurants found. Try adjusting your search." : "Explore our interactive map to discover restaurants around the world."}
-                  </p>
-                  <Map />
-                </div>
-              )}
+              <RestaurantsList 
+                restaurants={restaurantResults || []} 
+                onSubscribe={handleSubscribe}
+                isSubscribed={isSubscribed}
+              />
             </TabsContent>
           </Tabs>
         </div>
