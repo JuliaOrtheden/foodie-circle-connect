@@ -11,8 +11,8 @@ const Map = () => {
 
     mapboxgl.accessToken = 'pk.eyJ1Ijoib3J0aGVkZW4iLCJhIjoiY201d2FtcXRvMDB6czJqc2c4amY0NTEyZiJ9.KQ6tvS33Fj6lQylrzmDc7g';
     
-    // Stockholm coordinates
-    const stockholmCoordinates = [18.0686, 59.3293];
+    // Stockholm coordinates as [longitude, latitude] tuple
+    const stockholmCoordinates: [number, number] = [18.0686, 59.3293];
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
