@@ -11,12 +11,14 @@ const Map = () => {
 
     mapboxgl.accessToken = 'pk.eyJ1Ijoib3J0aGVkZW4iLCJhIjoiY201d2FtcXRvMDB6czJqc2c4amY0NTEyZiJ9.KQ6tvS33Fj6lQylrzmDc7g';
     
+    // Stockholm coordinates
+    const stockholmCoordinates = [18.0686, 59.3293];
+    
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      projection: 'globe',
-      zoom: 1.5,
-      center: [30, 15],
+      center: stockholmCoordinates,
+      zoom: 11,
       pitch: 45,
     });
 
@@ -27,6 +29,11 @@ const Map = () => {
       }),
       'top-right'
     );
+
+    // Add marker for Stockholm
+    new mapboxgl.Marker()
+      .setLngLat(stockholmCoordinates)
+      .addTo(map.current);
 
     // Disable scroll zoom for smoother experience
     map.current.scrollZoom.disable();
@@ -39,55 +46,6 @@ const Map = () => {
         'horizon-blend': 0.2,
       });
     });
-
-    // Rotation animation
-    const secondsPerRevolution = 240;
-    const maxSpinZoom = 5;
-    const slowSpinZoom = 3;
-    let userInteracting = false;
-    let spinEnabled = true;
-
-    function spinGlobe() {
-      if (!map.current) return;
-      
-      const zoom = map.current.getZoom();
-      if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-        let distancePerSecond = 360 / secondsPerRevolution;
-        if (zoom > slowSpinZoom) {
-          const zoomDif = (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-          distancePerSecond *= zoomDif;
-        }
-        const center = map.current.getCenter();
-        center.lng -= distancePerSecond;
-        map.current.easeTo({ center, duration: 1000, easing: (n) => n });
-      }
-    }
-
-    // Event listeners for interaction
-    map.current.on('mousedown', () => {
-      userInteracting = true;
-    });
-    
-    map.current.on('dragstart', () => {
-      userInteracting = true;
-    });
-    
-    map.current.on('mouseup', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
-    
-    map.current.on('touchend', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
-
-    map.current.on('moveend', () => {
-      spinGlobe();
-    });
-
-    // Start spinning
-    spinGlobe();
 
     // Cleanup
     return () => {
